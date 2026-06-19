@@ -45,6 +45,22 @@ prepwise-lite/
 - Ensure Supabase is connected properly
 - Complete all features before deployment
 
+## Deployment Checklist
+
+Deploy to Vercel by connecting your GitHub repository. Set these **three environment variables** in the Vercel dashboard (Project → Settings → Environment Variables):
+
+| Variable | Description | Where to find it |
+|---|---|---|
+| `GROQ_API_KEY` | API key for Groq LLM | [console.groq.com/keys](https://console.groq.com/keys) — create a key |
+| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL | Supabase Dashboard → Settings → API → Project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | Supabase Dashboard → Settings → API → Project API Keys → `anon` / `public` |
+
+After deploying, run the database migration:
+1. Open your Supabase project dashboard
+2. Go to the **SQL Editor**
+3. Paste the contents of `supabase/migrations/001_create_plans_table.sql`
+4. Click **Run**
+
 ## Submission
 
 **Deadline: 20th June (end of day)**

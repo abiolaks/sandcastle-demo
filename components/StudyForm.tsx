@@ -70,10 +70,10 @@ export default function StudyForm({ onSubmit, isLoading }: StudyFormProps) {
   }
 
   const inputClass = (field: keyof FieldErrors) =>
-    `mt-1 block w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-colors ${
+    `mt-1 block w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-all duration-200 ${
       errors[field]
-        ? "border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-        : "border-zinc-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+        ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/30"
+        : "border-zinc-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
     }`;
 
   return (
@@ -168,7 +168,7 @@ export default function StudyForm({ onSubmit, isLoading }: StudyFormProps) {
       <button
         type="submit"
         disabled={isLoading}
-        className="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+        className="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-indigo-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
       >
         {isLoading && <Spinner className="mr-2 h-4 w-4" />}
         {isLoading ? "Generating…" : "Generate Plan"}
