@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import { SYSTEM_PROMPT, buildUserPrompt } from "@/lib/prompt";
 import { recoverJson } from "@/lib/json-recovery";
 
@@ -123,13 +124,49 @@ export async function POST(request: Request) {
       );
     }
 
-    // Return the plan
-    return NextResponse.json({
+    // Save to Supabase
+    const planContent = {
       subject,
       topics,
       hoursPerDay: Number(hoursPerDay),
       examDate,
       schedule: parsed.schedule,
+    };
+
+    let savedId: string | null = null;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (supabaseUrl && supabaseKey && supabaseUrl !== "your_supabase_url_here") {
+      try {
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        const { data: saved, error: dbError } = await supabase
+          .from("plans")
+          .insert({
+            subject,
+            topics,
+            exam_date: examDate,
+            hours_per_day: Number(hoursPerDay),
+            plan_content: planContent,
+          })
+          .select("id")
+          .single();
+
+        if (dbError) {
+          console.error("Supabase insert error:", dbError);
+        } else if (saved) {
+          savedId = saved.id;
+        }
+      } catch (dbErr) {
+        console.error("Failed to save plan to Supabase:", dbErr);
+        // Don't fail the request if DB save fails — the plan is still valid.
+      }
+    }
+
+    // Return the plan with the saved id
+    return NextResponse.json({
+      ...planContent,
+      id: savedId,
     });
   } catch (e) {
     console.error("Unexpected error in /api/generate:", e);

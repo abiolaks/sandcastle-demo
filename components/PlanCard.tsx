@@ -7,6 +7,7 @@ export interface ScheduleDay {
 }
 
 export interface StudyPlan {
+  id?: string | null;
   subject: string;
   topics: string;
   hoursPerDay: number;

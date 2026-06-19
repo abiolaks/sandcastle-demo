@@ -1,13 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import StudyForm, { type StudyFormData } from "@/components/StudyForm";
 import PlanCard, { type StudyPlan } from "@/components/PlanCard";
+import { getSupabase } from "@/lib/supabase";
 
 export default function Home() {
   const [plan, setPlan] = useState<StudyPlan | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Load the most recent plan on mount
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadLatest() {
+      try {
+        const supabase = getSupabase();
+        const { data, error: dbError } = await supabase
+          .from("plans")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+
+        if (dbError) {
+          // No plans exist yet — that's fine, show the form.
+          if (dbError.code !== "PGRST116") {
+            console.error("Failed to load latest plan:", dbError);
+          }
+          return;
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const row = data as Record<string, any> | null;
+        if (row && !cancelled) {
+          const content = row.plan_content as StudyPlan;
+          setPlan({ ...content, id: row.id });
+        }
+      } catch {
+        // Silently fail — the form is still usable.
+      }
+    }
+
+    loadLatest();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleSubmit(data: StudyFormData) {
     setError(null);
@@ -47,6 +88,14 @@ export default function Home() {
           </h1>
           <p className="mt-2 text-sm text-zinc-500">
             Enter your details and get a personalized AI-powered study schedule.
+          </p>
+          <p className="mt-2">
+            <Link
+              href="/plans"
+              className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+            >
+              View saved plans →
+            </Link>
           </p>
         </div>
 
