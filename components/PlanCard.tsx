@@ -8,8 +8,7 @@ export interface ScheduleDay {
 
 export interface StudyPlan {
   id?: string | null;
-  subject: string;
-  topics: string;
+  courseName: string;
   hoursPerDay: number;
   examDate: string;
   schedule: ScheduleDay[];
@@ -24,10 +23,10 @@ export default function PlanCard({ plan }: PlanCardProps) {
     <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-6">
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-zinc-900">
-          {plan.subject} Study Plan
+          {plan.courseName} Study Plan
         </h2>
         <p className="mt-1 text-sm text-zinc-500 break-words">
-          {plan.topics} · {plan.hoursPerDay}h/day · Exam: {plan.examDate}
+          {plan.hoursPerDay}h/day · Exam: {plan.examDate}
         </p>
       </div>
 

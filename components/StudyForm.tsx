@@ -4,8 +4,7 @@ import { type FormEvent, useState } from "react";
 import Spinner from "@/components/Spinner";
 
 export interface StudyFormData {
-  subject: string;
-  topics: string;
+  courseName: string;
   hoursPerDay: number;
   examDate: string;
 }
@@ -16,15 +15,13 @@ interface StudyFormProps {
 }
 
 interface FieldErrors {
-  subject?: string;
-  topics?: string;
+  courseName?: string;
   hoursPerDay?: string;
   examDate?: string;
 }
 
 export default function StudyForm({ onSubmit, isLoading }: StudyFormProps) {
-  const [subject, setSubject] = useState("");
-  const [topics, setTopics] = useState("");
+  const [courseName, setCourseName] = useState("");
   const [hoursPerDay, setHoursPerDay] = useState("");
   const [examDate, setExamDate] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -32,11 +29,8 @@ export default function StudyForm({ onSubmit, isLoading }: StudyFormProps) {
   function validate(): boolean {
     const next: FieldErrors = {};
 
-    if (!subject.trim()) {
-      next.subject = "Subject is required.";
-    }
-    if (!topics.trim()) {
-      next.topics = "Topics are required.";
+    if (!courseName.trim()) {
+      next.courseName = "Course name is required.";
     }
     const hours = Number(hoursPerDay);
     if (!hoursPerDay || Number.isNaN(hours) || hours < 1 || hours > 16) {
@@ -62,8 +56,7 @@ export default function StudyForm({ onSubmit, isLoading }: StudyFormProps) {
     if (!validate()) return;
 
     onSubmit({
-      subject: subject.trim(),
-      topics: topics.trim(),
+      courseName: courseName.trim(),
       hoursPerDay: Number(hoursPerDay),
       examDate,
     });
@@ -80,43 +73,22 @@ export default function StudyForm({ onSubmit, isLoading }: StudyFormProps) {
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
       <div>
         <label
-          htmlFor="subject"
+          htmlFor="courseName"
           className="block text-sm font-medium text-zinc-700"
         >
-          Subject
+          Course Name
         </label>
         <input
-          id="subject"
+          id="courseName"
           type="text"
-          className={inputClass("subject")}
-          placeholder="e.g. Biology 101"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
+          className={inputClass("courseName")}
+          placeholder='e.g. "CS 101: Introduction to Computer Science"'
+          value={courseName}
+          onChange={(e) => setCourseName(e.target.value)}
           disabled={isLoading}
         />
-        {errors.subject && (
-          <p className="mt-1 text-xs text-red-500">{errors.subject}</p>
-        )}
-      </div>
-
-      <div>
-        <label
-          htmlFor="topics"
-          className="block text-sm font-medium text-zinc-700"
-        >
-          Topics
-        </label>
-        <input
-          id="topics"
-          type="text"
-          className={inputClass("topics")}
-          placeholder="e.g. Cell structure, DNA replication, Photosynthesis"
-          value={topics}
-          onChange={(e) => setTopics(e.target.value)}
-          disabled={isLoading}
-        />
-        {errors.topics && (
-          <p className="mt-1 text-xs text-red-500">{errors.topics}</p>
+        {errors.courseName && (
+          <p className="mt-1 text-xs text-red-500">{errors.courseName}</p>
         )}
       </div>
 

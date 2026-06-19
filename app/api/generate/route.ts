@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { SYSTEM_PROMPT, buildUserPrompt } from "@/lib/prompt";
 import { recoverJson } from "@/lib/json-recovery";
+import { searchCourseTopics } from "@/lib/web-search";
 
 const LLM_API_KEY = process.env.LLM_API_KEY || process.env.GROQ_API_KEY;
 const LLM_BASE_URL =
@@ -12,12 +13,12 @@ const LLM_MODEL =
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { subject, topics, hoursPerDay, examDate } = body;
+    const { courseName, hoursPerDay, examDate } = body;
 
     // Validate inputs
-    if (!subject || !topics || !hoursPerDay || !examDate) {
+    if (!courseName || !hoursPerDay || !examDate) {
       return NextResponse.json(
-        { error: "All fields are required: subject, topics, hoursPerDay, examDate." },
+        { error: "All fields are required: courseName, hoursPerDay, examDate." },
         { status: 400 }
       );
     }
@@ -41,13 +42,23 @@ export async function POST(request: Request) {
       Math.ceil((exam.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
     );
 
+    // Phase 1: Search the web for course topics
+    let searchResults: string | undefined;
+    try {
+      const result = await searchCourseTopics(courseName);
+      searchResults = result.text;
+    } catch (searchErr) {
+      console.warn("Web search failed, falling back to LLM inference:", searchErr);
+      // Continue without search results — the LLM will infer topics.
+    }
+
     // Build prompts
     const userPrompt = buildUserPrompt({
-      subject,
-      topics,
+      courseName,
       hoursPerDay: Number(hoursPerDay),
       examDate,
       daysRemaining,
+      searchResults,
     });
 
     // Call LLM
@@ -126,8 +137,7 @@ export async function POST(request: Request) {
 
     // Save to Supabase
     const planContent = {
-      subject,
-      topics,
+      courseName,
       hoursPerDay: Number(hoursPerDay),
       examDate,
       schedule: parsed.schedule,
@@ -143,8 +153,8 @@ export async function POST(request: Request) {
         const { data: saved, error: dbError } = await supabase
           .from("plans")
           .insert({
-            subject,
-            topics,
+            subject: courseName,
+            topics: courseName,
             exam_date: examDate,
             hours_per_day: Number(hoursPerDay),
             plan_content: planContent,

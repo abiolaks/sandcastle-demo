@@ -2,10 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import PlanCard, {
-  type StudyPlan,
-  type ScheduleDay,
-} from "@/components/PlanCard";
+import PlanCard, { type StudyPlan } from "@/components/PlanCard";
 import Spinner from "@/components/Spinner";
 import { getSupabase } from "@/lib/supabase";
 
@@ -17,6 +14,33 @@ interface SavedPlan {
   hours_per_day: number;
   plan_content: StudyPlan;
   created_at: string;
+}
+
+/** Normalize old and new plan data shapes into the current StudyPlan interface. */
+function normalizePlan(row: SavedPlan): StudyPlan {
+  const content = row.plan_content;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const c = content as Record<string, any>;
+
+  // New format: plan_content.courseName exists
+  if (typeof c.courseName === "string") {
+    return {
+      id: row.id,
+      courseName: c.courseName,
+      hoursPerDay: c.hoursPerDay ?? row.hours_per_day,
+      examDate: c.examDate ?? row.exam_date,
+      schedule: Array.isArray(c.schedule) ? c.schedule : [],
+    };
+  }
+
+  // Old format: plan_content has subject + topics instead of courseName
+  return {
+    id: row.id,
+    courseName: c.subject || row.subject,
+    hoursPerDay: c.hoursPerDay ?? row.hours_per_day,
+    examDate: c.examDate ?? row.exam_date,
+    schedule: Array.isArray(c.schedule) ? c.schedule : [],
+  };
 }
 
 export default function PlansPage() {
@@ -45,16 +69,7 @@ export default function PlansPage() {
         }
 
         if (!cancelled && data) {
-          const mapped: StudyPlan[] = (data as SavedPlan[]).map((row) => ({
-            id: row.id,
-            subject: row.subject || row.plan_content.subject,
-            topics: row.topics || row.plan_content.topics,
-            hoursPerDay: row.hours_per_day || row.plan_content.hoursPerDay,
-            examDate: row.exam_date || row.plan_content.examDate,
-            schedule:
-              row.plan_content.schedule ||
-              (row.plan_content as unknown as ScheduleDay[]),
-          }));
+          const mapped: StudyPlan[] = (data as SavedPlan[]).map(normalizePlan);
           setPlans(mapped);
         }
       } catch {
@@ -130,7 +145,7 @@ export default function PlansPage() {
           <div className="space-y-6">
             {plans.map((plan) => (
               <PlanCard
-                key={plan.id || plan.examDate + plan.subject}
+                key={plan.id || plan.examDate + plan.courseName}
                 plan={plan}
               />
             ))}

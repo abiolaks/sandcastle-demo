@@ -36,8 +36,17 @@ export default function Home() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const row = data as Record<string, any> | null;
         if (row && !cancelled) {
-          const content = row.plan_content as StudyPlan;
-          setPlan({ ...content, id: row.id });
+          const content = row.plan_content;
+          // Normalize old format (subject+topics) and new format (courseName)
+          const normalized: StudyPlan = {
+            id: row.id,
+            courseName:
+              content.courseName || content.subject || row.subject || "",
+            hoursPerDay: content.hoursPerDay ?? row.hours_per_day,
+            examDate: content.examDate ?? row.exam_date,
+            schedule: Array.isArray(content.schedule) ? content.schedule : [],
+          };
+          setPlan(normalized);
         }
       } catch {
         // Silently fail — the form is still usable.
@@ -89,8 +98,9 @@ export default function Home() {
             PrepWise AI
           </h1>
           <p className="text-sm text-zinc-500 max-w-md mx-auto">
-            Smart Study Planner — enter your details and get a personalized
-            AI-powered study schedule using spaced repetition and active recall.
+            Smart Study Planner — enter your course name and exam date, and our
+            AI agent searches the web for topics to build your personalized study
+            schedule using spaced repetition and active recall.
           </p>
           <nav>
             <Link
