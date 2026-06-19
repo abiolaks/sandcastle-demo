@@ -15,7 +15,7 @@ await run({
   // The agent provider. Pass a model string to pi() — sonnet balances
   // capability and speed for most tasks. Switch to claude-opus-4-7 for harder
   // problems, or claude-haiku-4-5-20251001 for speed.
-  agent: pi("claude-sonnet-4-6"),
+  agent: pi("deepseek-v4-pro"),
 
   // Path to the prompt file. Shell expressions inside are evaluated inside the
   // sandbox at the start of each iteration, so the agent always sees fresh data.
