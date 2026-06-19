@@ -6,6 +6,7 @@ import PlanCard, {
   type StudyPlan,
   type ScheduleDay,
 } from "@/components/PlanCard";
+import Spinner from "@/components/Spinner";
 import { getSupabase } from "@/lib/supabase";
 
 interface SavedPlan {
@@ -90,9 +91,10 @@ export default function PlansPage() {
 
         {/* Loading */}
         {isLoading && (
-          <p className="text-center text-sm text-zinc-500">
+          <div className="flex items-center justify-center gap-2 py-8 text-sm text-zinc-500">
+            <Spinner className="h-5 w-5" />
             Loading saved plans…
-          </p>
+          </div>
         )}
 
         {/* Empty state */}

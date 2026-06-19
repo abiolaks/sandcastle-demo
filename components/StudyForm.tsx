@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import Spinner from "@/components/Spinner";
 
 export interface StudyFormData {
   subject: string;
@@ -169,7 +170,8 @@ export default function StudyForm({ onSubmit, isLoading }: StudyFormProps) {
         disabled={isLoading}
         className="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
       >
-        {isLoading ? "Generating..." : "Generate Plan"}
+        {isLoading && <Spinner className="mr-2 h-4 w-4" />}
+        {isLoading ? "Generating…" : "Generate Plan"}
       </button>
     </form>
   );
